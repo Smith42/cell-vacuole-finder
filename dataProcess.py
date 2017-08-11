@@ -9,6 +9,7 @@ if __name__ == "__main__":
     cellImages = []
 
     for img in glob.glob(filepath+"*Red -*"):
+        print(img)
         imBW = io.imread(img)
         thresh = filters.threshold_otsu(imBW)
         mask = imBW <= thresh
@@ -24,6 +25,7 @@ if __name__ == "__main__":
                     or (cells[i][1].stop - cells[i][1].start) <= 0.8*(cells[i][0].stop - cells[i][0].start):
                 del cells[i]
 
+        print("Cells found:", len(cells))
         for i in np.arange(len(cells)):
             # Append cells to master list
             cellImages.append(imBW[cells[i]])
