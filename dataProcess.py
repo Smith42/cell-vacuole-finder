@@ -1,6 +1,6 @@
 import numpy as np
 import h5py
-from skimage import io, filters
+from skimage import io, filters, measure
 import glob
 from scipy import ndimage as ndi
 
