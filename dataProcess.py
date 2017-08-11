@@ -12,11 +12,9 @@ def resizeArray(arr):
     outArr = np.zeros((100,100))
 
     # Resize the arr
-    calmRatio = 34.0/np.amax(calmTmp.shape)
-    stressRatio = 34.0/np.amax(stressTmp.shape)
+    ratio = 100.0/np.amax(arr.shape)
 
-    calm3d = scipy.ndimage.interpolation.zoom(calmTmp, (calmRatio))
-    stress3d = scipy.ndimage.interpolation.zoom(stressTmp, (stressRatio))
+    outArr = scipy.ndimage.interpolation.zoom(arr, (ratio))
     outArr[:arr.shape[0],:arr.shape[1]] = arr
     return normalise(outArr)
 
@@ -31,7 +29,7 @@ def normalise(inData):
 
 if __name__ == "__main__":
     filepath = "/data/jim/alex/VAC/UCH.48h.REF.plateA.n1_AM/" # Filepath to plate images
-    cellImages = np.zeros[1,100,100]
+    cellImages = np.zeros([1,100,100])
 
     for img in glob.glob(filepath+"*Red -*"):
         print(img)
