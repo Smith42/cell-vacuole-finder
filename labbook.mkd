@@ -1,0 +1,17 @@
+# Cell CNN Labbook
+
+## 2017-08-08
+* The data are all in .tif files. I can use PIL to import these as np arrays.
+* I will need some sort of edge detection to cut the cells out of the large image.
+
+## 2017-08-09
+* The edge detection doesn't work too well... I think the issue is the background noise drowning out the cells.
+* It works with certain fields. I am using otsu atm.
+* Cy5 is the channel that is useful to me (it shows the vacuoles).
+
+## 2017-08-11
+* A naive approach of two rounds of object detection, once on the entire image, and again on each found cell, doesn't seem to be working
+    too well. The object detection algorithm (otsu) doesn't pick up all the holes, doesn't discriminate between joined cells, and doesn't
+    discriminate between background and holes.
+* Maybe using entropy and compression would be a good measure to find holes (if entropy is larger there are more holes?).
+* I will try entropy on many cells to see what happens.
