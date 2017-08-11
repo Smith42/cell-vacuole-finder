@@ -4,9 +4,34 @@ from skimage import io, filters, measure
 import glob
 from scipy import ndimage as ndi
 
+def resizeArray(arr):
+    """
+    Interpolate array to fit (100,100).
+    """
+
+    outArr = np.zeros((100,100))
+
+    # Resize the arr
+    calmRatio = 34.0/np.amax(calmTmp.shape)
+    stressRatio = 34.0/np.amax(stressTmp.shape)
+
+    calm3d = scipy.ndimage.interpolation.zoom(calmTmp, (calmRatio))
+    stress3d = scipy.ndimage.interpolation.zoom(stressTmp, (stressRatio))
+    outArr[:arr.shape[0],:arr.shape[1]] = arr
+    return normalise(outArr)
+
+def normalise(inData):
+    """
+    Normalise array.
+    """
+    inDataAbs = np.fabs(inData)
+    inDataMax = np.amax(inData)
+    normalisedData = inDataAbs/inDataMax
+    return normalisedData
+
 if __name__ == "__main__":
     filepath = "/data/jim/alex/VAC/UCH.48h.REF.plateA.n1_AM/" # Filepath to plate images
-    cellImages = []
+    cellImages = np.zeros[1,100,100]
 
     for img in glob.glob(filepath+"*Red -*"):
         print(img)
@@ -26,10 +51,11 @@ if __name__ == "__main__":
                 del cells[i]
 
         print("Cells found:", len(cells))
-        for i in np.arange(len(cells)):
-            # Append cells to master list
-            cellImages.append(imBW[cells[i]])
+        if len(cells) != 0:
+            for i in np.arange(len(cells)):
+                # Append cells to master list
+                cellImages = np.append(cellImages, resizeArray(imBW[cells[i]]), axis=0)
 
     h5f = h5py.File("./data/cellImages.h5", "w")
-    h5f.create_dataset("cellImages", data=cellImages)
+    h5f.create_dataset("cellImages", data=cellImages[1:])
     h5f.close()

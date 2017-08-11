@@ -15,3 +15,5 @@
     discriminate between background and holes.
 * Maybe using entropy and compression would be a good measure to find holes (if entropy is larger there are more holes?).
 * I will try entropy on many cells to see what happens.
+* Entropy seems to work...
+* I can't save the cells into h5py without putting them in a numpy array. I will have to resize them.
