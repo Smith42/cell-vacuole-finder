@@ -1,12 +1,16 @@
 from __future__ import print_function
-import numpy as np
-import h5py
-from skimage import io, filters, measure, segmentation
-import glob
-from scipy import ndimage as ndi
 import matplotlib
 matplotlib.use("Agg")
-import time
+import numpy as np
+import h5py
+from skimage import io, filters, measure, segmentation, exposure
+from skimage.filters import rank
+from skimage.morphology import watershed, disk, reconstruction, remove_small_objects
+from scipy.misc import toimage
+import glob
+from scipy import ndimage as ndi
+import matplotlib.pyplot as plt
+import time, datetime
 
 def resizeArray(arr):
     """
@@ -51,7 +55,7 @@ def getVacuholes(cell):
 
     thresh = filters.threshold_mean(filled-cell)
     mask = (filled-cell) >= thresh
-    mask = morphology.remove_small_objects(mask, 100)
+    mask = remove_small_objects(mask, 100)
     labeled = measure.label(mask)
 
     vacuoles = ndi.find_objects(labeled)
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     blueimgs = sorted(glob.glob(filepath+"*Blue -*"))
     uvimgs = sorted(glob.glob(filepath+"*UV -*"))
 
-    for i in len(redimgs):
+    for i in np.arange(len(redimgs)):
         t1 = time.time()
         cellImagesRAW = []
         vacuoleArr = []
@@ -87,7 +91,7 @@ if __name__ == "__main__":
 
         p0, p1 = np.percentile(r, (10, 70)) # These parameters can be changed to affect the sensitivity of measurement
         rRescaled = exposure.rescale_intensity(r, in_range=(p0, p1))
-        thresh = filters.threshold_iso(rRescaled)
+        thresh = filters.threshold_li(rRescaled)
         mask = rRescaled <= thresh
         gradient = rank.gradient(mask==0, disk(2))
 
@@ -101,7 +105,7 @@ if __name__ == "__main__":
         if len(cells) != 0:
             for j in np.arange(len(cells)):
                 # Append cells to master list
-                cellImagesRAW.append(imBW[cells[j]])
+                cellImagesRAW.append(r[cells[j]])
             for cell in cellImagesRAW:
                 ind = getVacuholes(cell)
                 vacuoleArr.append(ind)
@@ -116,33 +120,33 @@ if __name__ == "__main__":
         imBright = img.point(lambda p: p * 3) # Make each pixel brighter
         plt.imshow(imBright)
 
-        plt.title("Vacuole finder output "+dt+"\n"+redimg)
+        plt.title("Vacuole finder output "+dt+"\n"+redimgs[i])
         ax.axis("off")
 
         cellData = []
         vacData = []
 
-        for i in np.arange(np.shape(cells)[0]):
-            avgx = int(np.mean((cells[i,1].start,cells[i,1].stop)))
+        for j in np.arange(np.shape(cells)[0]):
+            avgx = int(np.mean((cells[j,1].start,cells[j,1].stop)))
             xst = cells[i,1].start
-            avgy = int(np.mean((cells[i,0].start,cells[i,0].stop)))
+            avgy = int(np.mean((cells[j,0].start,cells[j,0].stop)))
             yst = cells[i,0].start
-            cellSize = abs((cells[i,0].stop-cells[i,0].start)*(cells[i,1].stop-cells[i,1].start))
-            noVacs = len(vacuoleArr[i])
-            cellData.append([i,int(avgx),int(avgy),int(cellSize),noVacs])
+            cellSize = abs((cells[j,0].stop-cells[j,0].start)*(cells[j,1].stop-cells[j,1].start))
+            noVacs = len(vacuoleArr[j])
+            cellData.append([j,int(avgx),int(avgy),int(cellSize),noVacs])
 
-            for j in np.arange(len(vacuoleArr[i])):
-                avgvx = int(np.mean((vacuoleArr[i][j,1].start,vacuoleArr[i][j,1].stop)))
-                avgvy = int(np.mean((vacuoleArr[i][j,0].start,vacuoleArr[i][j,0].stop)))
-                vacSize = abs((vacuoleArr[i][j,0].stop-vacuoleArr[i][j,0].start)*(vacuoleArr[i][j,1].stop-vacuoleArr[i][j,1].start))
-                vacData.append([i,int(xst+avgvx),int(yst+avgvy),int(vacSize)])
+            for k in np.arange(len(vacuoleArr[j])):
+                avgvx = int(np.mean((vacuoleArr[j][k,1].start,vacuoleArr[j][k,1].stop)))
+                avgvy = int(np.mean((vacuoleArr[j][k,0].start,vacuoleArr[j][k,0].stop)))
+                vacSize = abs((vacuoleArr[j][k,0].stop-vacuoleArr[j][k,0].start)*(vacuoleArr[j][k,1].stop-vacuoleArr[j][k,1].start))
+                vacData.append([j,int(xst+avgvx),int(yst+avgvy),int(vacSize)])
                 plt.scatter(xst+avgvx,yst+avgvy,s=10,marker='.',c="white")
 
             plt.annotate(str(i),xy=(avgx,avgy),color="white")
 
-        np.savetxt("./logs/"+dt+"_cellData", cellData, fmt="%i", delimiter=",", header=redimg+"\ncellNo,xcoord,ycoord,size,noVacuoles")
-        np.savetxt("./logs/"+dt+"_vacuoleData", vacData, fmt="%i", delimiter=",", header=redimg+"\ncellNo,xcoord,ycoord,size")
-        plt.savefig("./figures/output/"+dt+"_outputExampleRGB.png")
+        np.savetxt("./logs/"+dt+"_slide_"+i+"_cellData", cellData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
+        np.savetxt("./logs/"+dt+"_slide_"+i+"_vacuoleData", vacData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
+        plt.savefig("./figures/output/"+dt+"_slide_"+i+"_outputExampleRGB.png")
 
         t2 = time.time()
         print(t2-t1, "seconds")
