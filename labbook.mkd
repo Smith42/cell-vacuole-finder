@@ -91,6 +91,20 @@
   <img src="./figures/output/2017-08-28_16:07:00_outputExample.png" alt="Example of cells found via watershed, and vacuoles via hole filler." style="width: 900px;"/>
 * The issue is that I have to use lists so that the cells can be different sizes. I will rewrite the python script to find a way around this.
  
-## 2017-08-29
+## 2017-08-30
 * Updated getCells to also save the cellRatios to a h5py file.
-* I need to write an
+* It looks like the cell finder has trouble if the cell has an ill-defined border, or has no nucleus. 
+    - These false positives can be fixed with clustering. This might not work as well on individual slides because there aren't as many examples 
+      (if there are no false positives, the clustering algorithm will attempt to group the real cells into two clusters).
+* New algorithm idea:
+```
+  take in all slices
+  find cells, ratio, placement:
+    cluster away cell noise
+    mask cells, ratio, placement
+    save to HDF5
+
+  feed in HDF5:
+    use masked cell array to find vacuoles
+  output images, cell xy, vac xy, sizes, etc.
+```

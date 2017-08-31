@@ -128,9 +128,9 @@ if __name__ == "__main__":
 
         for j in np.arange(np.shape(cells)[0]):
             avgx = int(np.mean((cells[j,1].start,cells[j,1].stop)))
-            xst = cells[i,1].start
+            xst = cells[j,1].start
             avgy = int(np.mean((cells[j,0].start,cells[j,0].stop)))
-            yst = cells[i,0].start
+            yst = cells[j,0].start
             cellSize = abs((cells[j,0].stop-cells[j,0].start)*(cells[j,1].stop-cells[j,1].start))
             noVacs = len(vacuoleArr[j])
             cellData.append([j,int(avgx),int(avgy),int(cellSize),noVacs])
@@ -142,11 +142,11 @@ if __name__ == "__main__":
                 vacData.append([j,int(xst+avgvx),int(yst+avgvy),int(vacSize)])
                 plt.scatter(xst+avgvx,yst+avgvy,s=10,marker='.',c="white")
 
-            plt.annotate(str(i),xy=(avgx,avgy),color="white")
+            plt.annotate(str(j),xy=(avgx,avgy),color="white")
 
-        np.savetxt("./logs/"+dt+"_slide_"+i+"_cellData", cellData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
-        np.savetxt("./logs/"+dt+"_slide_"+i+"_vacuoleData", vacData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
-        plt.savefig("./figures/output/"+dt+"_slide_"+i+"_outputExampleRGB.png")
+        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
+        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
+        plt.savefig("./figures/output/"+dt+"_slide_"+str(i)+"_outputExampleRGB.png")
 
         t2 = time.time()
         print(t2-t1, "seconds")

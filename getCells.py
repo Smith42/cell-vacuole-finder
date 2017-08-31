@@ -31,8 +31,8 @@ def normalise(inData):
 
 if __name__ == "__main__":
     filepath = "/data/jim/alex/VAC/UCH.48h.REF.plateA.n1_AM/" # Filepath to plate images
-    cellImages = np.zeros([1,200,200])
-    cellRatios = np.zeros([1,1])
+    cellImages = np.zeros([1,1,200,200])
+    cellRatios = np.zeros([1,1,1])
     t0 = time.time()
     ## Need to rewrite this... look at exampleImages
 
@@ -62,11 +62,11 @@ if __name__ == "__main__":
 
         print("Cells found:", len(cells))
         if len(cells) != 0:
-            for i in np.arange(len(cells)):
+            for j in np.arange(len(cells)):
                 # Append cells to master list
-                cellIm, cellRat = resizeArray(imBW[cells[i]])
-                cellImages = np.append(cellImages, cellIm[np.newaxis,...], axis=0)
-                cellRatios = np.append(cellRatios, cellRat[np.newaxis,...], axis=0)
+                cellIm, cellRat = resizeArray(imBW[cells[j]])
+                cellImages = np.append(cellImages[i], cellIm[np.newaxis,np.newaxis,...], axis=1)
+                cellRatios = np.append(cellRatios[i], cellRat[np.newaxis,np.newaxis,...], axis=1)
         t2 = time.time()
         print(t2-t1, "seconds")
 
@@ -76,11 +76,9 @@ if __name__ == "__main__":
     print(dict(zip(unique, counts)))
     blueCells = np.argmax(counts) # This is where the cells are likely to be
     yellowCells = np.argmin(counts) # This is where the noise is likely to be
-    blueMask = X_kmeans[1] == blueCells
-    yellowMask = X_kmeans[1] == yellowCells
-    cellImages = cellImages[1:] # Remove blank first cell
+    blueMask = np.reshape(X_kmeans[1] == blueCells, cellImages.shape[:1])
+    yellowMask = np.reshape(X_kmeans[1] == yellowCells, cellImages.shape[:1])
     cellImages = cellImages[blueMask] # Remove noise
-    cellRatios = cellRatios[1:] # Remove blank first cell
     cellRatios = cellRatios[blueMask] # Remove noise
 
     print(t2-t0, "s total time")
