@@ -1,10 +1,11 @@
 from __future__ import print_function
 import numpy as np
-import h5py
+import pickle
 from skimage import io, filters, measure, segmentation, exposure
 from skimage.filters import rank
 from skimage.morphology import watershed, disk, reconstruction, remove_small_objects
-from sklearn.cluster import k_means
+from sklearn.cluster import KMeans
+from sklearn.externals import joblib
 import glob
 from scipy import ndimage as ndi
 import time
@@ -21,7 +22,7 @@ def resizeArray(arr):
 
     arr = ndi.interpolation.zoom(arr, (ratio))
     outArr[:arr.shape[0],:arr.shape[1]] = arr
-    return normalise(outArr), ratio
+    return normalise(outArr)
 
 def normalise(inData):
     """
@@ -34,9 +35,7 @@ def normalise(inData):
 
 if __name__ == "__main__":
     filepath = "/data/jim/alex/VAC/UCH.48h.REF.plateA.n1_AM/" # Filepath to plate images
-    cellImages = []
-    cellRatios = []
-    cellSlide =[]
+    cellImages = np.zeros([1,200,200])
     t0 = time.time()
 
     redimgs = sorted(glob.glob(filepath+"*Red -*"))
@@ -67,31 +66,21 @@ if __name__ == "__main__":
         if len(cells) != 0:
             for j in np.arange(len(cells)):
                 # Append cells to master list
-                cellIm, cellRat = resizeArray(r[cells[j]])
-                cellImages.append(cellIm)
-                cellRatios.append(cellRat)
-                cellSlide.append(i)
+                cellIm = resizeArray(r[cells[j]])
+                cellImages = np.append(cellImages, cellIm[np.newaxis,...], axis=0)
         t2 = time.time()
         print(t2-t1, "seconds")
 
-    cellRatios = np.array(cellRatios)
-    cellImages = np.array(cellImages)
-    cellSlide = np.array(cellSlide)
-
     print("Running k-means cluster to filter out noise...")
-    X_kmeans = k_means(np.reshape(cellImages,[-1,200*200]), 2, n_init=50) ## This looks like it works!!
-    unique, counts = np.unique(X_kmeans[1], return_counts=True)
+    model = KMeans(n_clusters=2, n_init=50).fit(np.reshape(cellImages,[-1,200*200]))
+    joblib.dump(model, "./logs/model.pkl")
+    predictions = model.predict(np.reshape(cellImages,[-1,200*200]))
+    unique, counts = np.unique(predictions, return_counts=True)
     print(dict(zip(unique, counts)))
     blueCells = np.argmax(counts) # This is where the cells are likely to be
-    yellowCells = np.argmin(counts) # This is where the noise is likely to be
-    blueMask = np.reshape(X_kmeans[1] == blueCells, cellImages.shape[:1])
-    yellowMask = np.reshape(X_kmeans[1] == yellowCells, cellImages.shape[:1])
-    cellImages = cellImages[blueMask] # Remove noise
-    cellRatios = cellRatios[blueMask] # Remove noise
-    cellSlide = cellSlide[blueMask] # Remove noise
 
+    log = open("./logs/blueCell.txt","w+")
+    strOut = str(str(dict(zip(unique, counts)))+"\nNon-noise cells are likely: "+str(blueCells))
+    log.write(strOut)
+    log.close()
     print(t2-t0, "s total time")
-    h5f = h5py.File("./data/cellImages.h5", "w")
-    h5f.create_dataset("cellImages", data=cellImages)
-    h5f.create_dataset("cellRatios", data=cellRatios)
-    h5f.close()
