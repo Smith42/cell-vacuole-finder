@@ -108,3 +108,8 @@
     use masked cell array to find vacuoles
   output images, cell xy, vac xy, sizes, etc.
 ```
+
+## 2017-09-01
+* This doesn't work. The kmeans classifier is not finding any pattern in the data.
+* It looks like the UV nuclei finder is having issues when it finds a nuclei that has no corresponding red filter.
+     - This could be fixed by not using orphan nuclei as markers in watershed.
