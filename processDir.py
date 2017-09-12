@@ -149,7 +149,7 @@ if __name__ == "__main__":
             plt.annotate(str(j),xy=(avgx,avgy),color="white")
 
         # Outlier detection through a IQR threshold on cell size
-        if len(cellData) != 0:
+        try:
             cellData = np.array(cellData)
             vacData = np.array(vacData)
             outlierMask = (cellData[:,3] < loBound) | (cellData[:,3] > hiBound)
@@ -164,8 +164,8 @@ if __name__ == "__main__":
             np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData[~vOutlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
             plt.savefig("./figures/output/"+dt+"_slide_"+str(i)+"_outputExampleRGB.png")
 
-        else:
-            print("No cells found, so nothing will be outputted.")
+        except Exception as e:
+            print("An error has occurred. So nothing will be outputted.\n", e)
 
         t2 = time.time()
         print(t2-t1, "seconds")
