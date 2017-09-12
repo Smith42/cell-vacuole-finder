@@ -1,0 +1,13 @@
+Automatic detection of cells and vacuoles through image segmentation
+=============================================================================================
+
+A watershed segmentation method, with cell nuclei acting as initial markers, is used to automatically detect cells from plates scanned by the IN Cell Analyzer 6000. Morphological reconstruction by erosion is used to find dark spots in each found cell, and label them as vacuoles. Finally, a shifted interquartile range is applied to the found cells’ logarithmed sizes, to detect and remove outliers. A python script has been written to output an RGB image with all found cells and vacuoles labelled, and detected anomalies labelled in blue. An example is below. The script also outputs two log files per slide, describing attributes of each found cell and vacuole. This method takes around 5 seconds to scan a slide, and has been adapted to process slides in bulk from a given directory.
+
+<img src="./figures/example.png" alt="Example output" style="width: 900px;"/>
+  
+Please see the full report for more information on the algorithm used.
+
+Usage
+=======
+
+processDir.py finds all slide images matching a regex in a given directory, and runs the algorithm on them. genExample.ipynb runs the same algorithm interactively in a Jupyter notebook. genIQR.ipynb finds the interquartile range of a size sample, and returns the likely upper and lower size bounds of inliers.
