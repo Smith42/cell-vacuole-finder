@@ -156,9 +156,9 @@ if __name__ == "__main__":
             outlierData = cellData[outlierMask]
             vOutlierMask = np.zeros(vacData.shape[0], dtype=bool)
             # Detect and label outliers, and find vacuoles in cells that are outliers
-            for i in np.arange(np.shape(outlierData)[0]):
-                plt.annotate(str(outlierData[i,0]),xy=(outlierData[i,1],outlierData[i,2]),color="blue")
-                vOutlierMask = vOutlierMask + np.array(vacData)[:,0] == outlierData[i,0]
+            for j in np.arange(np.shape(outlierData)[0]):
+                plt.annotate(str(outlierData[j,0]),xy=(outlierData[j,1],outlierData[j,2]),color="blue")
+                vOutlierMask = vOutlierMask + np.array(vacData)[:,0] == outlierData[j,0]
 
             np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData[~outlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
             np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData[~vOutlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
