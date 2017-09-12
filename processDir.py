@@ -67,6 +67,10 @@ if __name__ == "__main__":
 
     t0 = time.time()
 
+    # Lower and upper boundaries of inliers, according to genIQR.ipynb:
+    loBound = 8700
+    hiBound = 305476
+
     # If the naming convention for slides changes this will also need to be changed.
     redimgs = sorted(glob.glob(filepath+"*Red -*"))
     greenimgs = sorted(glob.glob(filepath+"*Green -*"))
@@ -144,8 +148,19 @@ if __name__ == "__main__":
 
             plt.annotate(str(j),xy=(avgx,avgy),color="white")
 
-        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
-        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData, fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
+        # Outlier detection through a IQR threshold on cell size
+        cellData = np.array(cellData)
+        vacData = np.array(vacData)
+        outlierMask = (cellData[:,3] < loBound) | (cellData[:,3] > hiBound)
+        outlierData = cellData[outlierMask]
+        vOutlierMask = np.zeros(vacData.shape[0], dtype=bool)
+        # Detect and label outliers, and find vacuoles in cells that are outliers
+        for i in np.arange(np.shape(outlierData)[0]):
+            plt.annotate(str(outlierData[i,0]),xy=(outlierData[i,1],outlierData[i,2]),color="blue")
+            vOutlierMask = vOutlierMask + np.array(vacData)[:,0] == outlierData[i,0]
+
+        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData[~outlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
+        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData[~vOutlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
         plt.savefig("./figures/output/"+dt+"_slide_"+str(i)+"_outputExampleRGB.png")
 
         t2 = time.time()

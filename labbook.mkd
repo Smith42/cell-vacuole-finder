@@ -56,7 +56,7 @@
 * Once cells are separated we can try watershed segmentation on a negative of each cell and see how well/poorly it works.
     - The cell nuclei may be good places to have watershed seeds. Looks like UV has the nuclei nicely picked out for me.
 * Watershed works better but still not great, probably "good enough" though.
-<img src="./figures/cells/cellsWatershed.png" alt="Example of cells found via watershed" style="width: 900px;"/
+<img src="./figures/cells/cellsWatershed.png" alt="Example of cells found via watershed" style="width: 900px;"/>
 * Also I think that watershed would be a good choice for finding the vacuoles in the image.
 
 ## 2017-08-24
@@ -113,3 +113,16 @@
 * This doesn't work. The kmeans classifier is not finding any pattern in the data.
 * It looks like the UV nuclei finder is having issues when it finds a nuclei that has no corresponding red filter.
      - This could be fixed by not using orphan nuclei as markers in watershed.
+     
+## 2017-09-06
+* Training the isolation forest on all the cells does not work particularly well... I'm not sure of the reason, but it may still filter out noise on the poor images. I'm not sure if it is worthwhile including it in the algorithm, since it replaces the false positives with false negatives.
+
+## 2017-09-07
+* Perhaps the full cell image is too complicated for the isolation forest to pick out. 
+* I have extracted several variables from each cell. It might be useful to use these...
+* Applying log to the cell sizes may work to remove the small cell noise..
+* An IQR for the logged cell sizes gives us a good result:
+  <img src="./figures/interquartRange.png" alt="IQR inlier/outlier detection visualisation" style="width: 900px;"/>
+  
+## 2017-09-08
+* Writing up report now...
