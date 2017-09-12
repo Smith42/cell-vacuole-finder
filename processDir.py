@@ -160,9 +160,12 @@ if __name__ == "__main__":
                 plt.annotate(str(outlierData[i,0]),xy=(outlierData[i,1],outlierData[i,2]),color="blue")
                 vOutlierMask = vOutlierMask + np.array(vacData)[:,0] == outlierData[i,0]
 
-        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData[~outlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
-        np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData[~vOutlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
-        plt.savefig("./figures/output/"+dt+"_slide_"+str(i)+"_outputExampleRGB.png")
+            np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_cellData.csv", cellData[~outlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size,noVacuoles")
+            np.savetxt("./logs/"+dt+"_slide_"+str(i)+"_vacuoleData.csv", vacData[~vOutlierMask], fmt="%i", delimiter=",", header=redimgs[i]+"\ncellNo,xcoord,ycoord,size")
+            plt.savefig("./figures/output/"+dt+"_slide_"+str(i)+"_outputExampleRGB.png")
+
+        else:
+            print("No cells found, so nothing will be outputted.")
 
         t2 = time.time()
         print(t2-t1, "seconds")
